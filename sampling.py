@@ -1,39 +1,37 @@
 import pandas as pd
-import numpy as np
+import numpy as os
 
-#Risk based approach
+#Risk table
 risk_factor = 3
+df = pd.DataFrame([[0, 100000, 0, .04], 
+                    [100000, 500000, 2500, .02],  
+                    [500000, 1000000, 8500, .01],
+                    [1000000, 2999999,10000, .009]],
+                    columns=['Low', 'High', 'Base', 'Percentage'])
 
+#Creates Data Frame from clipboard data,
+# just make sure your numeric column is named "Amount"                   
 grab = pd.read_clipboard()
-
-df = pd.DataFrame(np.array([[0, 100000, 0, .04], 
-                            [100000, 500000, 2500, .02],  
-                            [500000, 1000000, 8500, .01],
-                            [1000000, 2999999,10000, .009]]),
-                   columns=['Low', 'High', 'Base', 'Percentage'])
-
 exp = grab['Amount'].sum()
 
-if exp > df.at[0,'Low'] and exp < df.at[0,'High']:
-    materiality = df.at[0, 'Base'] + df.at[0, 'Percentage'] * exp
+def selector(level):
+    """Selects random sample based on materiality"""
+    output = f"{os.path.abspath(__file__)}\\output_file.xlsx"
+    materiality = df.at[level, 'Base'] + df.at[level, 'Percentage'] * exp
     sample = (exp / materiality) * risk_factor
     sample_selection = grab.sample(n=int(sample), replace=True)
-    sample_selection.to_excel('output_file.xlsx')
+    sample_selection.to_excel(output)
+
+#If total of numeric column is between level.
+if exp > df.at[0,'Low'] and exp < df.at[0,'High']:
+    selector(0)
     
 elif exp > df.at[1,'Low'] and exp < df.at[1,'High']:
-    materiality = df.at[1, 'Base'] + df.at[1, 'Percentage'] * exp
-    sample = (exp / materiality) * risk_factor
-    sample_selection = grab.sample(n=int(sample), replace=True)
-    sample_selection.to_excel('output_file.xlsx')
-
-elif exp > df.at[2,'Low'] and exp < df.at[2,'High']:
-    materiality = df.at[2, 'Base'] + df.at[2, 'Percentage'] * exp
-    sample = (exp / materiality) * risk_factor
-    sample_selection = grab.sample(n=int(sample), replace=True)
-    sample_selection.to_excel('output_file.xlsx')
+    selector(1)
     
+elif exp > df.at[2,'Low'] and exp < df.at[2,'High']:
+    selector(2)
+   
 elif exp > df.at[3,'Low'] and exp < df.at[3,'High']:
-    materiality = df.at[3, 'Base'] + df.at[3, 'Percentage'] * exp
-    sample = (exp / materiality) * risk_factor
-    sample_selection = grab.sample(n=int(sample), replace=True)
-    sample_selection.to_excel('output_file.xlsx')
+    selector(3)
+    
